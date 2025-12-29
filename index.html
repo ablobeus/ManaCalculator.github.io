@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>MTG Mana Calculator</title>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -31,8 +30,9 @@ body{
     margin:auto;
     background:var(--bg-card);
     border-radius:18px;
-    box-shadow:0 20px 40px rgba(0,0,0,.6);
+    box-shadow:0 25px 50px rgba(0,0,0,.6);
     overflow:hidden;
+    padding:10px;
 }
 
 header{
@@ -46,10 +46,11 @@ h1{
     background:linear-gradient(to right,var(--accent),var(--accent-soft));
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
+    margin-bottom:5px;
 }
 
 .step{
-    margin:20px;
+    margin:20px 0;
     padding:20px;
     border-radius:14px;
     background:#0b2132;
@@ -58,8 +59,8 @@ h1{
 .step-number{
     background:var(--accent);
     color:#06231d;
-    width:32px;
-    height:32px;
+    width:36px;
+    height:36px;
     border-radius:50%;
     display:inline-flex;
     align-items:center;
@@ -71,26 +72,33 @@ h1{
 .color-selector{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
-    gap:15px;
+    gap:12px;
     margin-top:15px;
 }
 
 .color-option{
     background:#091e2d;
-    padding:12px;
-    border-radius:12px;
+    padding:10px;
+    border-radius:14px;
     text-align:center;
     cursor:pointer;
     border:2px solid transparent;
     transition:.3s;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-height:100px;
 }
 
 .color-option.selected{
     border-color:var(--accent);
-    box-shadow:0 0 12px rgba(26,188,156,.4);
+    box-shadow:0 0 15px rgba(26,188,156,.4);
 }
 
 .color-icon{
+    min-width:50px;
+    min-height:50px;
     width:50px;
     height:50px;
     border-radius:50%;
@@ -98,7 +106,7 @@ h1{
     align-items:center;
     justify-content:center;
     font-size:1.5rem;
-    margin:auto;
+    margin-bottom:8px;
 }
 
 .white{background:#f5f5dc;color:#333}
@@ -109,7 +117,7 @@ h1{
 
 button{
     width:100%;
-    padding:12px;
+    padding:14px;
     margin-top:15px;
     border:none;
     border-radius:10px;
@@ -123,20 +131,20 @@ button:disabled{opacity:.5}
 
 input{
     width:100%;
-    padding:10px;
+    padding:12px;
     margin-top:8px;
     border-radius:8px;
     border:1px solid rgba(255,255,255,.15);
     background:#091e2d;
     color:white;
+    font-size:1rem;
 }
 
 .hidden{display:none}
 
 /* ===== RESULTS ===== */
-
 .results{
-    margin:20px;
+    margin:20px 0;
 }
 
 .results-header{
@@ -146,20 +154,19 @@ input{
 
 .results-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
     gap:15px;
 }
 
 .result-card{
     background:#091e2d;
-    border-radius:12px;
+    border-radius:14px;
     padding:15px;
     border-left:5px solid var(--accent);
 }
 
 .result-card h3{
-    margin:8px 0;
-    font-size:1.1rem;
+    margin:5px 0;
 }
 
 .stat{
@@ -167,15 +174,14 @@ input{
     justify-content:space-between;
     margin-top:6px;
     color:var(--muted);
-    font-size:0.9rem;
 }
 
 .stat strong{color:var(--accent)}
 
 .summary{
     margin-top:20px;
-    padding:20px;
-    border-radius:12px;
+    padding:15px;
+    border-radius:14px;
     background:linear-gradient(135deg,rgba(26,188,156,.15),rgba(46,204,113,.1));
     text-align:center;
 }
@@ -183,31 +189,32 @@ input{
 .summary-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-    gap:15px;
-    margin-top:15px;
+    gap:10px;
+    margin-top:10px;
 }
 
 .summary-box{
     background:#091e2d;
-    padding:12px;
+    padding:10px;
     border-radius:10px;
 }
 
 .summary-box h2{
     margin:0;
     color:var(--accent);
+    font-size:1.5rem;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-
 <header>
     <h1>MTG Mana Calculator</h1>
     <p>Clean • Accurate • Elegant</p>
 </header>
 
+<!-- Step 1: Colors -->
 <div class="step" id="step1">
 <h2><span class="step-number">1</span>Colors</h2>
 <div class="color-selector">
@@ -220,15 +227,16 @@ input{
 <button id="nextBtn" disabled>Next</button>
 </div>
 
+<!-- Step 2: Mana Pips -->
 <div class="step hidden" id="step2">
 <h2><span class="step-number">2</span>Mana Pips</h2>
 <div id="pipInputs"></div>
-<button onclick="step2.classList.add('hidden');step3.classList.remove('hidden')">Next</button>
+<button id="toStep3">Next</button>
 </div>
 
+<!-- Step 3: Deck Configuration -->
 <div class="step hidden" id="step3">
 <h2><span class="step-number">3</span>Deck Configuration</h2>
-
 <button onclick="setFormat(24,60)">60 Cards</button>
 <button onclick="setFormat(35,100)">Commander</button>
 <button onclick="setFormat(17,40)">40 Cards</button>
@@ -242,8 +250,8 @@ input{
 <button onclick="calculate()">Calculate</button>
 </div>
 
+<!-- Results -->
 <div class="results hidden" id="results"></div>
-
 </div>
 
 <script>
@@ -264,8 +272,13 @@ nextBtn.onclick=()=>{
     step2.classList.remove("hidden");
     pipInputs.innerHTML="";
     selected.forEach(c=>{
-        pipInputs.innerHTML+=`<label>${names[c]} Pips</label><input id="pip-${c}" value="10">`;
+        pipInputs.innerHTML+=`<label>${names[c]} Pips</label><input id="pip-${c}" value="10" min="0" type="number">`;
     });
+};
+
+document.getElementById("toStep3").onclick=()=>{
+    step2.classList.add("hidden");
+    step3.classList.remove("hidden");
 };
 
 function setFormat(l,d){lands.value=l;deckSize.value=d}
