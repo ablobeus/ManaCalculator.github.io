@@ -1,65 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mana Distribution Calculator</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-        input, button { margin: 10px 0; padding: 8px; width: 100%; }
-        .result { margin-top: 20px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTG Mana Calculator</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+    --bg-main:#081825;
+    --bg-card:#0e2538;
+    --accent:#1abc9c;
+    --accent-soft:#2ecc71;
+    --text:#ecf0f1;
+    --muted:#9fb3c8;
+}
+
+*{box-sizing:border-box;font-family:Segoe UI,Tahoma,sans-serif}
+
+body{
+    background:linear-gradient(135deg,#07131e,#0f2f44);
+    color:var(--text);
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    background:var(--bg-card);
+    border-radius:18px;
+    box-shadow:0 25px 50px rgba(0,0,0,.6);
+    overflow:hidden;
+}
+
+header{
+    padding:30px;
+    text-align:center;
+    border-bottom:3px solid var(--accent);
+}
+
+h1{
+    font-size:2.4rem;
+    background:linear-gradient(to right,var(--accent),var(--accent-soft));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.step{
+    margin:30px;
+    padding:25px;
+    border-radius:14px;
+    background:#0b2132;
+}
+
+.step-number{
+    background:var(--accent);
+    color:#06231d;
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    margin-right:10px;
+}
+
+.color-selector{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:18px;
+    margin-top:20px;
+}
+
+.color-option{
+    background:#091e2d;
+    padding:16px;
+    border-radius:14px;
+    text-align:center;
+    cursor:pointer;
+    border:2px solid transparent;
+    transition:.3s;
+}
+
+.color-option.selected{
+    border-color:var(--accent);
+    box-shadow:0 0 15px rgba(26,188,156,.4);
+}
+
+.color-icon{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.8rem;
+    margin:auto;
+}
+
+.white{background:#f5f5dc;color:#333}
+.blue{background:#2980b9}
+.black{background:#2c3e50}
+.red{background:#c0392b}
+.green{background:#27ae60}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(to right,var(--accent),var(--accent-soft));
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:disabled{opacity:.5}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,.15);
+    background:#091e2d;
+    color:white;
+}
+
+.hidden{display:none}
+
+/* ===== RESULTS ===== */
+
+.results{
+    margin:30px;
+}
+
+.results-header{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.results-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.result-card{
+    background:#091e2d;
+    border-radius:14px;
+    padding:20px;
+    border-left:5px solid var(--accent);
+}
+
+.result-card h3{
+    margin:10px 0;
+}
+
+.stat{
+    display:flex;
+    justify-content:space-between;
+    margin-top:8px;
+    color:var(--muted);
+}
+
+.stat strong{color:var(--accent)}
+
+.summary{
+    margin-top:30px;
+    padding:25px;
+    border-radius:14px;
+    background:linear-gradient(135deg,rgba(26,188,156,.15),rgba(46,204,113,.1));
+    text-align:center;
+}
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.summary-box{
+    background:#091e2d;
+    padding:15px;
+    border-radius:10px;
+}
+
+.summary-box h2{
+    margin:0;
+    color:var(--accent);
+}
+</style>
 </head>
+
 <body>
-    <h2>Mana Distribution Calculator</h2>
-    <label for="colorCount">How many colors does your deck have?</label>
-    <input type="number" id="colorCount" min="1">
-    <button onclick="generateColorInputs()">Next</button>
+<div class="container">
 
-    <div id="colorInputs"></div>
-    <div id="landsInput" style="display:none;">
-        <label for="totalLands">How many lands in your deck?</label>
-        <input type="number" id="totalLands" min="1">
-        <button onclick="calculateLands()">Calculate</button>
-    </div>
+<header>
+    <h1>MTG Mana Calculator</h1>
+    <p>Clean • Accurate • Elegant</p>
+</header>
 
-    <div class="result" id="results"></div>
+<div class="step" id="step1">
+<h2><span class="step-number">1</span>Colors</h2>
+<div class="color-selector">
+<div class="color-option" id="whiteColor"><div class="color-icon white"><i class="fas fa-sun"></i></div>White</div>
+<div class="color-option" id="blueColor"><div class="color-icon blue"><i class="fas fa-tint"></i></div>Blue</div>
+<div class="color-option" id="blackColor"><div class="color-icon black"><i class="fas fa-moon"></i></div>Black</div>
+<div class="color-option" id="redColor"><div class="color-icon red"><i class="fas fa-fire"></i></div>Red</div>
+<div class="color-option" id="greenColor"><div class="color-icon green"><i class="fas fa-leaf"></i></div>Green</div>
+</div>
+<button id="nextBtn" disabled>Next</button>
+</div>
 
-    <script>
-        function generateColorInputs() {
-            const count = parseInt(document.getElementById("colorCount").value);
-            const colorInputs = document.getElementById("colorInputs");
-            colorInputs.innerHTML = "";
-            for (let i = 0; i < count; i++) {
-                colorInputs.innerHTML += `
-                    <label>Color ${i + 1} Name:</label>
-                    <input type="text" id="colorName${i}">
-                    <label>Number of pips for this color:</label>
-                    <input type="number" id="pips${i}" min="0">
-                `;
-            }
-            document.getElementById("landsInput").style.display = "block";
-        }
+<div class="step hidden" id="step2">
+<h2><span class="step-number">2</span>Mana Pips</h2>
+<div id="pipInputs"></div>
+<button onclick="step2.classList.add('hidden');step3.classList.remove('hidden')">Next</button>
+</div>
 
-        function calculateLands() {
-            const count = parseInt(document.getElementById("colorCount").value);
-            let colorNames = [], pips = [], totalPips = 0;
-            for (let i = 0; i < count; i++) {
-                colorNames.push(document.getElementById(`colorName${i}`).value);
-                const pipCount = parseInt(document.getElementById(`pips${i}`).value);
-                pips.push(pipCount);
-                totalPips += pipCount;
-            }
+<div class="step hidden" id="step3">
+<h2><span class="step-number">3</span>Deck Configuration</h2>
 
-            const totalLands = parseInt(document.getElementById("totalLands").value);
-            const results = document.getElementById("results");
-            results.innerHTML = "<h3>Results:</h3>";
-            for (let i = 0; i < count; i++) {
-                const ratio = pips[i] / totalPips;
-                const landsNeeded = Math.round(ratio * totalLands);
-                results.innerHTML += `<p>For the color <strong>${colorNames[i]}</strong>, you need <strong>${landsNeeded}</strong> lands.</p>`;
-            }
-        }
-    </script>
+<button onclick="setFormat(24,60)">60 Cards</button>
+<button onclick="setFormat(35,100)">Commander</button>
+<button onclick="setFormat(17,40)">40 Cards</button>
+
+<label>Total Lands</label>
+<input id="lands" value="24">
+
+<label>Deck Size</label>
+<input id="deckSize" value="60">
+
+<button onclick="calculate()">Calculate</button>
+</div>
+
+<div class="results hidden" id="results"></div>
+
+</div>
+
+<script>
+let selected=[];
+const names={white:"White",blue:"Blue",black:"Black",red:"Red",green:"Green"};
+
+document.querySelectorAll(".color-option").forEach(el=>{
+    el.onclick=()=>{
+        const c=el.id.replace("Color","");
+        el.classList.toggle("selected");
+        selected.includes(c)?selected=selected.filter(x=>x!==c):selected.push(c);
+        nextBtn.disabled=!selected.length;
+    };
+});
+
+nextBtn.onclick=()=>{
+    step1.classList.add("hidden");
+    step2.classList.remove("hidden");
+    pipInputs.innerHTML="";
+    selected.forEach(c=>{
+        pipInputs.innerHTML+=`<label>${names[c]} Pips</label><input id="pip-${c}" value="10">`;
+    });
+};
+
+function setFormat(l,d){lands.value=l;deckSize.value=d}
+
+function calculate(){
+    let totalPips=0;
+    selected.forEach(c=>totalPips+=+document.getElementById(`pip-${c}`).value||0);
+
+    let html=`<div class="results-header"><h2>Recommended Mana Base</h2></div><div class="results-grid">`;
+    let used=0;
+
+    selected.forEach(c=>{
+        const p=+document.getElementById(`pip-${c}`).value||0;
+        const l=Math.round((p/totalPips)*lands.value);
+        used+=l;
+        html+=`
+        <div class="result-card">
+            <h3>${names[c]}</h3>
+            <div class="stat">Pips <strong>${p}</strong></div>
+            <div class="stat">Lands <strong>${l}</strong></div>
+            <div class="stat">Share <strong>${Math.round(p/totalPips*100)}%</strong></div>
+        </div>`;
+    });
+
+    html+=`</div>
+    <div class="summary">
+        <h3>Deck Summary</h3>
+        <div class="summary-grid">
+            <div class="summary-box"><h2>${lands.value}</h2>Lands</div>
+            <div class="summary-box"><h2>${deckSize.value}</h2>Cards</div>
+            <div class="summary-box"><h2>${used}</h2>Assigned</div>
+            <div class="summary-box"><h2>${lands.value-used}</h2>Adjust</div>
+        </div>
+    </div>`;
+
+    results.innerHTML=html;
+    step3.classList.add("hidden");
+    results.classList.remove("hidden");
+}
+</script>
 </body>
 </html>
